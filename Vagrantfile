@@ -19,6 +19,10 @@ vm_spec = [
     # ................
     # ssh_port: 22222,
 
+    # ansible playbook
+    # ................
+    playbook: "playbook.yml",
+
     # if set vm_dir Change vdi image path.
     # ................
     # vm_dir: File.join("V:", "virtualbox"),
@@ -59,6 +63,13 @@ Vagrant.configure("2") do |config|
             vb.customize ['movevm', :id, '--folder', spec[:vm_dir]]
           end
         end
+      end
+      # Setting provision
+      vm.vm.provision "ansible_local" do |an|
+        an.limit = "all"
+        an.playbook = File.join('playbook', spec[:playbook])
+        an.inventory_path = "inventory"
+        # an.verbose = true
       end
     end
   end

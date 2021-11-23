@@ -1,0 +1,21 @@
+- name: "Disable password ssh access"
+  lineinfile: >-
+    dest='/etc/ssh/sshd_config'
+    state=present
+    backrefs=yes
+    regexp='{{ item.regexp }}'
+    line='{{ item.line }}'
+  with_items:
+  - regexp: '^#?\s*PasswordAuthentication\s+(yes|no)'
+    line: 'PasswordAuthentication no'
+  - regexp: '^#?\s*RSAAuthentication\s+(yes|no)'
+    line: 'RSAAuthentication yes'
+  - regexp: '^#?\s*PubkeyAuthentication\s+(yes|no)'
+    line: 'PubkeyAuthentication yes'
+  - regexp: '^#?\s*RhostsAuthentication\s+(yes|no)'
+    line: 'RhostsAuthentication no'
+  register: sshd_disable_passwd
+
+- name: "Restart service if setting changed"
+  service: name=sshd state=restarted
+  when: sshd_disable_passwd.changed

@@ -1,0 +1,4 @@
+vm1     ansible_connection=local
+
+[machines]
+vm1
