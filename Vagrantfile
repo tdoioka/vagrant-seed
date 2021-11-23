@@ -53,18 +53,19 @@ Vagrant.configure("2") do |config|
         vb.cpus = spec[:cpu]
         vb.memory = spec[:memory]
 
-        # Only run on the first build. Not run on reprovision or reload.
-        if not File.exist?(
-                 File.join(".vagrant","machines",spec[:name],"virtualbox","id")) then
-          # Move VM dir.
-          # ................................................................
-          if !(spec[:vm_dir].nil?) then
-            FileUtils.mkdir_p(spec[:vm_dir])
-            vb.customize ['movevm', :id, '--folder', spec[:vm_dir]]
-          end
+        # Move VM dir.
+        # ................................................................
+        if !(spec[:vm_dir].nil?) then
+          # Move twice to supress the error at reload.
+          vmdir = spec[:vm_dir]
+          vmtmp = File.join(vmdir, "tmp")
+          # Create dir
+          FileUtils.mkdir_p(vmtmp)
+          vb.customize ['movevm', :id, '--folder', vmtmp]
+          vb.customize ['movevm', :id, '--folder', vmdir]
         end
       end
-      # Setting provision
+      # Provisoning
       vm.vm.provision "ansible_local" do |an|
         an.limit = "all"
         an.playbook = File.join('playbook', spec[:playbook])
