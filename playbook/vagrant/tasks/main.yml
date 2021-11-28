@@ -1,0 +1,16 @@
+---
+- name: Generate a key directory
+  file:
+    state: directory
+    path: "{{ item.value }}"
+    mode: 01777
+  with_dict:
+    - "{{ keypairs.dirs }}"
+
+- name: Create SSL keypairs
+  include: create_ssl_keypair.yml
+  with_dict:
+    - "{{ keypairs.entity }}"
+  loop_control:
+    loop_var: entity
+    label: "stat: {{ keypairs.dirs.store }}/{{ entity.value.type }}_id.{{ entity.key }}"

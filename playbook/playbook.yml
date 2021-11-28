@@ -6,5 +6,6 @@
   vars_files:
     - vars.yml
   roles:
+    - vagrant
     - sshd
     - create-user

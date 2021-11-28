@@ -2,3 +2,15 @@
 users:
   - name: 'user01'
     password: "{{ 'passw0rd'|password_hash('sha512')}}"
+
+keypairs:
+  dirs:
+    tmp: '/tmp/_keys'
+    store: '/vagrant/_keys'
+  entity:
+    master:
+      type: ecdsa
+      size: 384
+    sub:
+      type: rsa
+      size: 4096

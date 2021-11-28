@@ -1,0 +1,25 @@
+---
+- name: "{{ entity.value.type }}_id.{{ entity.key }}: Check exists"
+  stat:
+    path: "{{ keypairs.dirs.store }}/{{ entity.value.type }}_id.{{ entity.key }}"
+  register:
+    keypairs_exists
+
+- name: "{{ entity.value.type }}_id.{{ entity.key }}: Generate"
+  become_user: vagrant
+  openssh_keypair:
+    state: present
+    type: "{{ entity.value.type }}"
+    path: "{{ keypairs.dirs.tmp }}/{{ entity.value.type }}_id.{{ entity.key }}"
+  when:
+    not keypairs_exists.stat.exists
+
+- name: "{{ entity.value.type }}_id.{{ entity.key }}: Install"
+  copy:
+    src:  "{{ keypairs.dirs.tmp }}/{{ entity.value.type }}_id.{{ entity.key }}{{ item }}"
+    dest: "{{ keypairs.dirs.store }}/{{ entity.value.type }}_id.{{ entity.key }}{{ item }}"
+  when:
+    not keypairs_exists.stat.exists
+  with_list:
+    - ''
+    - '.pub'
