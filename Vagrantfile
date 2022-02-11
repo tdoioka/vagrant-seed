@@ -35,6 +35,24 @@ def oncreate?(name)
   !File.exist?(vagrantdir)
 end
 
+def subcommand
+  ARGV.each do |arg|
+    return arg unless arg.start_with?('-')
+  end
+end
+
+def install_plugin_ifneed(name)
+  # When subcommand is `plugin expunge`, this function stack by a recursive call.
+  # Therefore early return when subcommand is plugin.
+  return if subcommand == 'plugin'
+  # Early return when already installed the plugin.
+  return if Vagrant.has_plugin?(name)
+
+  system("vagrant plugin install --local #{name}")
+  # Restart for the plugin features to take effect.
+  exit system('vagrant', *ARGV)
+end
+
 Vagrant.configure('2') do |config|
   vm_specs.each do |name, spec|
     config.vm.define name do |vmd|
@@ -51,7 +69,7 @@ Vagrant.configure('2') do |config|
 
       # Expand primary disk.
       if spec.key?(:expand_primary)
-        config.vagrant.plugins = 'vagrant-disksize'
+        install_plugin_ifneed('vagrant-disksize')
         vmd.disksize.size = spec[:expand_primary]
       end
 
