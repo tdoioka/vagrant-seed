@@ -28,6 +28,11 @@ def provisioning(vmd, playbook)
   end
 end
 
+def oncreate?(name)
+  vagrantdir = File.join('.vagrant', 'machines', name.to_s, 'virtualbox', 'box_meta')
+  !File.exist?(vagrantdir)
+end
+
 Vagrant.configure('2') do |config|
   vm_specs.each do |name, spec|
     config.vm.define name do |vm|
@@ -52,14 +57,8 @@ Vagrant.configure('2') do |config|
 
         # Move VM dir.
         # ................................................................
-        unless spec[:vm_dir].nil?
-          # Move twice to supress the error at reload.
-          vmdir = spec[:vm_dir]
-          vmtmp = File.join(vmdir, 'tmp')
-          # Create dir
-          FileUtils.mkdir_p(vmtmp)
-          vb.customize ['movevm', :id, '--folder', vmtmp]
-          vb.customize ['movevm', :id, '--folder', vmdir]
+        if spec.key?(:vm_dir) && oncreate?(name)
+          vb.customize ['movevm', :id, '--folder', spec[:vm_dir]]
         end
       end
       # Provisoning
