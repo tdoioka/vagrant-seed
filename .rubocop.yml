@@ -1,0 +1,26 @@
+require:
+  - rubocop-performance
+  - rubocop-rubycw
+
+AllCops:
+  NewCops: enable
+Layout/LineLength:
+  Max: 100
+
+Bundler:
+  Enabled: true
+
+Gemspec:
+  Enabled: true
+
+Lint:
+  Enabled: true
+
+Performance:
+  Enabled: true
+
+Rubycw:
+  Enabled: true
+
+Security:
+  Enabled: true
