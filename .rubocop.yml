@@ -7,6 +7,13 @@ AllCops:
 Layout/LineLength:
   Max: 100
 
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: consistent_comma
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
 Bundler:
   Enabled: true
 

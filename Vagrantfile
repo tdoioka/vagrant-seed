@@ -10,13 +10,13 @@ vm_specs = {
     cpu: 2, memory: 4096,
     # Port forawarding map. This hash key is host port and value is guest port.
     # portmap: {
-    #   22_222 => 22
+    #   22_222 => 22,
     # },
     # Changes virtualbox directory. NOTE: Only works at creating.
     # vm_dir: File.join('V:', 'virtualbox'),
     # ansible playbook
     playbook: 'playbook.yml',
-  }
+  },
 }
 
 def provisioning(vmd, playbook)
