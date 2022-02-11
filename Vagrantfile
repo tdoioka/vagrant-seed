@@ -12,6 +12,8 @@ vm_specs = {
     # portmap: {
     #   22_222 => 22,
     # },
+    # Expand primary disk option. NOTE: Ignoring when reduced.
+    # expand_primary: '64GB',
     # Changes virtualbox directory. NOTE: Only works at creating.
     # vm_dir: File.join('V:', 'virtualbox'),
     # ansible playbook
@@ -47,8 +49,13 @@ Vagrant.configure('2') do |config|
         end
       end
 
-      # Setting virtualbox spec
-      # ................................................................
+      # Expand primary disk.
+      if spec.key?(:expand_primary)
+        config.vagrant.plugins = 'vagrant-disksize'
+        vm.disksize.size = spec[:expand_primary]
+      end
+
+      # Specific virtualBox settings.
       vm.vm.provider 'virtualbox' do |vb|
         # Virtualbox setting
         vb.gui = false
