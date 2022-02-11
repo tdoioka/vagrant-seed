@@ -14,6 +14,13 @@ vm_specs = {
     # },
     # Expand primary disk option. NOTE: Ignoring when reduced.
     # expand_primary: '64GB',
+    # SerialPort Setting.
+    # serial: {
+    #   # 1 => { uart: ['0x3f8', 4], mode: %w[file NUL], type: ['16550A'] },
+    #   # 2 => { uart: ['0x2f8', 3], mode: %w[file NUL], type: ['16550A'] },
+    #   # 3 => { uart: ['0x3e8', 4], mode: %w[file NUL], type: ['16550A'] },
+    #   # 4 => { uart: ['0x2e8', 3], mode: %w[file NUL], type: ['16550A'] },
+    # },
     # Changes virtualbox directory. NOTE: Only works at creating.
     # vm_dir: File.join('V:', 'virtualbox'),
     # ansible playbook
@@ -53,6 +60,52 @@ def install_plugin_ifneed(name)
   exit system('vagrant', *ARGV)
 end
 
+# Virtualbox serial configurator.
+class SerialConfigurator
+  def initialize(vbox, spec_serial, logger: nil)
+    @vbox = vbox
+    @spec = spec_serial
+    @logger = logger
+  end
+
+  def _apply_uart(port)
+    cmd = ['modifyvm', :id, "--uart#{port}"]
+    if @spec.nil? || !@spec.key?(port) || !@spec[port].key?(:uart)
+      cmd.push('off')
+    else
+      cmd.push(@spec[port][:uart]).flatten!
+    end
+    @logger&.info "@@@@ #{cmd}"
+    @vbox.customize cmd
+  end
+
+  def _aply_sub(port, symbol)
+    if @spec.nil? || !@spec.key?(port) || !@spec[port].key?(:uart) || !@spec[port].key?(symbol)
+      return
+    end
+
+    cmd = ['modifyvm', :id, "--uart#{symbol}#{port}", @spec[port][symbol]].flatten!
+    @logger&.info "@@@@ #{cmd}"
+    @vbox.customize cmd
+  end
+
+  def _apply_mode(port)
+    _aply_sub(port, :mode)
+  end
+
+  def _apply_type(port)
+    _aply_sub(port, :type)
+  end
+
+  def apply
+    (1..4).each do |port|
+      _apply_uart(port)
+      _apply_mode(port)
+      _apply_type(port)
+    end
+  end
+end
+
 Vagrant.configure('2') do |config|
   vm_specs.each do |name, spec|
     config.vm.define name do |vmd|
@@ -81,10 +134,11 @@ Vagrant.configure('2') do |config|
         vb.memory = spec[:memory]
 
         # Move VM dir.
-        # ................................................................
         if spec.key?(:vm_dir) && oncreate?(name)
           vb.customize ['movevm', :id, '--folder', spec[:vm_dir]]
         end
+        # configure VM.
+        SerialConfigurator.new(vb, spec[:serial]).apply
       end
       # Provisoning
       provisioning(vmd, spec[:playbook]) unless spec[:playbook].nil?
