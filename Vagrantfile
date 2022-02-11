@@ -37,10 +37,10 @@ end
 
 Vagrant.configure('2') do |config|
   vm_specs.each do |name, spec|
-    config.vm.define name do |vm|
+    config.vm.define name do |vmd|
       # box
       # ................................................................
-      vm.vm.box = spec[:box]
+      vmd.vm.box = spec[:box]
       # Netowrk setting
       # ................................................................
       if spec.key?(:portmap)
@@ -52,11 +52,11 @@ Vagrant.configure('2') do |config|
       # Expand primary disk.
       if spec.key?(:expand_primary)
         config.vagrant.plugins = 'vagrant-disksize'
-        vm.disksize.size = spec[:expand_primary]
+        vmd.disksize.size = spec[:expand_primary]
       end
 
       # Specific virtualBox settings.
-      vm.vm.provider 'virtualbox' do |vb|
+      vmd.vm.provider 'virtualbox' do |vb|
         # Virtualbox setting
         vb.gui = false
         vb.cpus = spec[:cpu]
@@ -69,7 +69,7 @@ Vagrant.configure('2') do |config|
         end
       end
       # Provisoning
-      provisioning(vm, spec[:playbook]) unless spec[:playbook].nil?
+      provisioning(vmd, spec[:playbook]) unless spec[:playbook].nil?
     end
   end
 end
