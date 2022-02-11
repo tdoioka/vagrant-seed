@@ -8,8 +8,10 @@ vm_specs = {
     # box: 'bento/ubuntu-20.04',
     # Machine specs, The unit of 'memory' is MiB.
     cpu: 2, memory: 4096,
-    # ssh port forwarding spec[:ssh_port]->22.
-    # ssh_port: 22_222,
+    # Port forawarding map. This hash key is host port and value is guest port.
+    # portmap: {
+    #   22_222 => 22
+    # },
     # Changes virtualbox directory. NOTE: Only works at creating.
     # vm_dir: File.join('V:', 'virtualbox'),
     # ansible playbook
@@ -34,7 +36,11 @@ Vagrant.configure('2') do |config|
       vm.vm.box = spec[:box]
       # Netowrk setting
       # ................................................................
-      config.vm.network :forwarded_port, guest: 22, host: spec[:ssh_port] if spec.key?(:ssh_port)
+      if spec.key?(:portmap)
+        spec[:portmap].each do |from, to|
+          config.vm.network :forwarded_port, guest: to, host: from
+        end
+      end
 
       # Setting virtualbox spec
       # ................................................................
