@@ -63,7 +63,7 @@ Vagrant.configure('2') do |config|
       # ................................................................
       if spec.key?(:portmap)
         spec[:portmap].each do |from, to|
-          config.vm.network :forwarded_port, guest: to, host: from
+          vmd.vm.network :forwarded_port, guest: to, host: from
         end
       end
 
