@@ -186,6 +186,7 @@ Vagrant.configure('2') do |config|
     config.vm.define name do |vmd|
       # box
       vmd.vm.box = spec[:box]
+      vmd.vm.hostname = name
       configuration_network(vmd, spec)
       # Expand primary disk.
       if spec.key?(:expand_primary)
