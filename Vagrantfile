@@ -62,14 +62,19 @@ def install_plugin_ifneed(name)
   exit system('vagrant', *ARGV)
 end
 
-# Virtualbox serial configurator.
-class SerialConfigurator
-  def initialize(vbox, spec_serial, logger: nil)
+# Abstrut configurator
+class AbstructVboxConfigurator
+  def initialize(vbox, spec_field, logger: nil)
     @vbox = vbox
-    @spec = spec_serial
+    @spec = spec_field
     @logger = logger
   end
 
+  def aply; end
+end
+
+# Virtualbox serial configurator.
+class SerialConfigurator < AbstructVboxConfigurator
   def _apply_uart(port)
     cmd = ['modifyvm', :id, "--uart#{port}"]
     if @spec.nil? || !@spec.key?(port) || !@spec[port].key?(:uart)
@@ -109,13 +114,7 @@ class SerialConfigurator
 end
 
 # Virtualbox audio configurator
-class AudioConfigurator
-  def initialize(vbox, spec_audio, logger: nil)
-    @vbox = vbox
-    @spec = spec_audio
-    @logger = logger
-  end
-
+class AudioConfigurator < AbstructVboxConfigurator
   def _apply_type
     cmd = ['modifyvm', :id, '--audio']
     if @spec.nil? || !@spec.key?(:type)
