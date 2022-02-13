@@ -12,6 +12,8 @@ vm_specs = {
     # portmap: {
     #   22_222 => 22,
     # },
+    # Private network (uses virtualbox internal network).
+    private_ip: '172.16.20.11',
     # Expand primary disk option. NOTE: Ignoring when reduced.
     # expand_primary: '64GB',
     # Boot disks. (none, floppy, dvd, disk, net)
@@ -175,6 +177,8 @@ def configuration_network(vmd, spec)
       vmd.vm.network :forwarded_port, guest: to, host: from
     end
   end
+  # private_network
+  vmd.vm.network :private_network, ip: spec[:private_ip] if spec.key?(:private_ip)
 end
 
 Vagrant.configure('2') do |config|
