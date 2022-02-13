@@ -168,20 +168,21 @@ class BootorderConfigurator < AbstructVboxConfigurator
   end
 end
 
+def configuration_network(vmd, spec)
+  # Netowrk setting
+  if spec.key?(:portmap)
+    spec[:portmap].each do |from, to|
+      vmd.vm.network :forwarded_port, guest: to, host: from
+    end
+  end
+end
+
 Vagrant.configure('2') do |config|
   vm_specs.each do |name, spec|
     config.vm.define name do |vmd|
       # box
-      # ................................................................
       vmd.vm.box = spec[:box]
-      # Netowrk setting
-      # ................................................................
-      if spec.key?(:portmap)
-        spec[:portmap].each do |from, to|
-          vmd.vm.network :forwarded_port, guest: to, host: from
-        end
-      end
-
+      configuration_network(vmd, spec)
       # Expand primary disk.
       if spec.key?(:expand_primary)
         install_plugin_ifneed('vagrant-disksize')
