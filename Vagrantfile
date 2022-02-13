@@ -21,6 +21,8 @@ vm_specs = {
     #   # 3 => { uart: ['0x3e8', 4], mode: %w[file NUL], type: ['16550A'] },
     #   # 4 => { uart: ['0x2e8', 3], mode: %w[file NUL], type: ['16550A'] },
     # },
+    # Audio Setting
+    # audio: { type: 'dsound', controller: 'ac97', codec: 'stac9700', in: 'off', out: 'off' },
     # Changes virtualbox directory. NOTE: Only works at creating.
     # vm_dir: File.join('V:', 'virtualbox'),
     # ansible playbook
@@ -106,6 +108,42 @@ class SerialConfigurator
   end
 end
 
+# Virtualbox audio configurator
+class AudioConfigurator
+  def initialize(vbox, spec_audio, logger: nil)
+    @vbox = vbox
+    @spec = spec_audio
+    @logger = logger
+  end
+
+  def _apply_type
+    cmd = ['modifyvm', :id, '--audio']
+    if @spec.nil? || !@spec.key?(:type)
+      cmd.push('none')
+    else
+      cmd.push(@spec[:type])
+    end
+    @logger&.info "@@@@ #{cmd}"
+    @vbox.customize cmd
+  end
+
+  def _apply(symbol)
+    return if @spec.nil? || !@spec.key?(:type) || !@spec.key?(symbol)
+
+    cmd = ['modifyvm', :id, "--audio#{symbol}", @spec[symbol]]
+    @logger&.info "@@@@ #{cmd}"
+    @vbox.customize cmd
+  end
+
+  def apply
+    _apply_type
+    _apply(:controller)
+    _apply(:codec)
+    _apply(:in)
+    _apply(:out)
+  end
+end
+
 Vagrant.configure('2') do |config|
   vm_specs.each do |name, spec|
     config.vm.define name do |vmd|
@@ -139,6 +177,7 @@ Vagrant.configure('2') do |config|
         end
         # configure VM.
         SerialConfigurator.new(vb, spec[:serial]).apply
+        AudioConfigurator.new(vb, spec[:audio]).apply
       end
       # Provisoning
       provisioning(vmd, spec[:playbook]) unless spec[:playbook].nil?
