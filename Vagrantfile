@@ -14,6 +14,8 @@ vm_specs = {
     # },
     # Expand primary disk option. NOTE: Ignoring when reduced.
     # expand_primary: '64GB',
+    # Boot disks. (none, floppy, dvd, disk, net)
+    # bootorder: %w[floppy dvd disk],
     # SerialPort Setting.
     # serial: {
     #   # 1 => { uart: ['0x3f8', 4], mode: %w[file NUL], type: ['16550A'] },
@@ -143,6 +145,29 @@ class AudioConfigurator < AbstructVboxConfigurator
   end
 end
 
+# Virtualbox boot order configuration
+class BootorderConfigurator < AbstructVboxConfigurator
+  def _bootname(order)
+    if @spec.nil?
+      device = 'none'
+      device = 'disk' if order.zero?
+    else
+      device = @spec[order].to_s
+      device = 'none' if device == ''
+    end
+    device
+  end
+
+  def apply
+    (0..3).each do |order|
+      device = _bootname(order)
+      cmd = ['modifyvm', :id, "--boot#{order + 1}", device]
+      @logger&.info "@@@@ #{cmd}"
+      @vbox.customize cmd
+    end
+  end
+end
+
 Vagrant.configure('2') do |config|
   vm_specs.each do |name, spec|
     config.vm.define name do |vmd|
@@ -175,6 +200,7 @@ Vagrant.configure('2') do |config|
           vb.customize ['movevm', :id, '--folder', spec[:vm_dir]]
         end
         # configure VM.
+        BootorderConfigurator.new(vb, spec[:bootorder]).apply
         SerialConfigurator.new(vb, spec[:serial]).apply
         AudioConfigurator.new(vb, spec[:audio]).apply
       end
