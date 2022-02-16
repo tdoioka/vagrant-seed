@@ -14,6 +14,7 @@ vm_specs = {
     # },
     # Private network (uses virtualbox internal network).
     private_ip: '172.16.20.11',
+    public_ip: '192.168.11.101',
     # Expand primary disk option. NOTE: Ignoring when reduced.
     # expand_primary: '64GB',
     # Boot disks. (none, floppy, dvd, disk, net)
@@ -33,6 +34,46 @@ vm_specs = {
     playbook: 'playbook.yml',
   },
 }
+
+def os
+  @os ||= begin
+    host_os = RbConfig::CONFIG['host_os']
+    case host_os
+    when /mswin|msys|mingw|cyugwin|bccwin|wince|emc/ then :windows
+    when /darwin|mac os/ then :macosx
+    when /linux/ then :linux
+    when /solaris|bsd/ then :unix
+    else :unknown
+    end
+  end
+end
+
+def bridge_if_win
+  desc = ''
+  `ipconfig /all`.scan(/(Default.*|Description.*)/).each do |line|
+    kv = line[0].split(' : ')
+    case kv[0]
+    when /^Description.*/ then desc = kv[1]
+    when /^Default Gateway.*/
+      return desc unless kv[1].nil?
+    end
+  end
+end
+
+def bridge_if_linux
+  # Not tested
+  `VBoxManage list bridgedifs | grep '^Name:' | head -n 1`.chomp.sub(
+    /^Name: +/, '',
+  )
+end
+
+def bridge_if
+  @bridge_if ||=
+    case os
+    when :windows then bridge_if_win
+    when :linux then bridge_if_linux
+    end
+end
 
 def provisioning(vmd, playbook)
   vmd.vm.provision 'ansible_local' do |an|
@@ -179,6 +220,8 @@ def configuration_network(vmd, spec)
   end
   # private_network
   vmd.vm.network :private_network, ip: spec[:private_ip] if spec.key?(:private_ip)
+  # public netork
+  vmd.vm.network :public_network, ip: spec[:public_ip], bridge: bridge_if if spec.key?(:public_ip)
 end
 
 Vagrant.configure('2') do |config|
