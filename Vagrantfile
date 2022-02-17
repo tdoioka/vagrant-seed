@@ -1,39 +1,39 @@
 # frozen_string_literal: true
 
-vm_specs = {
+VM_SPECS = {
   vmbox: {
-    # Base image.
+    ## Base image.
     box: 'ubuntu/focal64',
     # box: 'generic/ubuntu2004',
     # box: 'bento/ubuntu-20.04',
-    # Machine specs, The unit of 'memory' is MiB.
+    ## Machine specs, The unit of 'memory' is MiB.
     cpu: 2, memory: 4096,
-    # Port forawarding map. This hash key is host port and value is guest port.
+    ## Port forawarding map. This hash key is host port and value is guest port.
     # portmap: {
     #   22_222 => 22,
     # },
-    # Private network (uses virtualbox internal network).
-    private_ip: '172.16.20.11',
-    public_ip: '192.168.11.101',
-    # Expand primary disk option. NOTE: Ignoring when reduced.
+    ## Private network (uses virtualbox internal network).
+    # private_ip: '172.16.20.11',
+    # public_ip: '192.168.11.101',
+    ## Expand primary disk option. NOTE: Ignoring when reduced.
     # expand_primary: '64GB',
-    # Boot disks. (none, floppy, dvd, disk, net)
+    ## Boot disks. (none, floppy, dvd, disk, net)
     # bootorder: %w[floppy dvd disk],
-    # SerialPort Setting.
+    ## SerialPort Setting.
     # serial: {
     #   # 1 => { uart: ['0x3f8', 4], mode: %w[file NUL], type: ['16550A'] },
     #   # 2 => { uart: ['0x2f8', 3], mode: %w[file NUL], type: ['16550A'] },
     #   # 3 => { uart: ['0x3e8', 4], mode: %w[file NUL], type: ['16550A'] },
     #   # 4 => { uart: ['0x2e8', 3], mode: %w[file NUL], type: ['16550A'] },
     # },
-    # Audio Setting
+    ## Audio Setting
     # audio: { type: 'dsound', controller: 'ac97', codec: 'stac9700', in: 'off', out: 'off' },
-    # Changes virtualbox directory. NOTE: Only works at creating.
+    ## Changes virtualbox directory. NOTE: Only works at creating.
     # vm_dir: File.join('V:', 'virtualbox'),
-    # ansible playbook
+    ## ansible playbook
     playbook: 'playbook.yml',
   },
-}
+}.freeze
 
 def os
   @os ||= begin
@@ -225,7 +225,7 @@ def configuration_network(vmd, spec)
 end
 
 Vagrant.configure('2') do |config|
-  vm_specs.each do |name, spec|
+  VM_SPECS.each do |name, spec|
     config.vm.define name do |vmd|
       # box
       vmd.vm.box = spec[:box]
