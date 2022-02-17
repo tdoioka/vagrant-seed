@@ -98,7 +98,7 @@ end
 def install_plugin_ifneed(name)
   # When subcommand is `plugin expunge`, this function stack by a recursive call.
   # Therefore early return when subcommand is plugin.
-  return if subcommand == 'plugin'
+  return if subcommand == /plugin|destroy/
   # Early return when already installed the plugin.
   return if Vagrant.has_plugin?(name)
 
