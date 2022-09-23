@@ -13,7 +13,7 @@ VM_SPECS = {
     #   22_222 => 22,
     # },
     ## Private network (uses virtualbox internal network).
-    # private_ip: '172.16.20.11',
+    private_ip: '192.168.56.11',
     # public_ip: '192.168.11.101',
     ## Expand primary disk option. NOTE: Ignoring when reduced.
     # expand_primary: '64GB',
