@@ -246,6 +246,7 @@ Vagrant.configure('2') do |config|
 
         # Move VM dir.
         if spec.key?(:vm_dir) && oncreate?(name)
+          FileUtils.mkdir_p(spec[:vm_dir])
           vb.customize ['movevm', :id, '--folder', spec[:vm_dir]]
         end
         # configure VM.
