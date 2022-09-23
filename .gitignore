@@ -1,2 +1,10 @@
+# for vagrant
 .vagrant
 _keys
+
+# for ruby
+*.gem
+*.rbc
+/.config/
+/.bundle/
+/gems/
